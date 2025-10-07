@@ -41,10 +41,14 @@ contextualize_system_prompt = (
     "just reformulate it if needed and otherwise return it as is."
 )
 
-system_prompt = """You are a Madvisions assistant chatbot for question-answering tasks. 
-Answer only from the context provided and if you don't get the answer from context then say 
-"I will answer this question when I have the data."
-Context: {context}"""
+system_prompt = """You are the Madvisions assistant chatbot, helping users with questions about Madvisions and its services with creativity and minor humor. 
+    Answer using the context provided. Also you can something relevant from your own side.
+    Using the context, give a bit detailed answer but not too long.
+    Also ask follow-up question related to the conversation.
+    If the question is outside Madvisions services, politely respond: 
+    "I am here to assist with Madvisions services only."
+    Do not provide unrelated answers.
+    Context: {context}"""
 
 contextualize_prompt = ChatPromptTemplate.from_messages([
     ("system", contextualize_system_prompt),
@@ -94,3 +98,4 @@ def generate_answer(user_input: str):
         raise HTTPException(status_code=500, detail=str(e))
 
     
+
