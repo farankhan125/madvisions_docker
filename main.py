@@ -26,7 +26,7 @@ llm = ChatGoogleGenerativeAI(
 
 # Reload vector DB (no re-embedding, fast)
 vector_store = AstraDBVectorStore(
-        collection_name="Madvisions_Data",       
+        collection_name="Madvisions_Data_Second",       
         embedding=embedding_model,
         api_endpoint=os.environ["ASTRA_DB_API_ENDPOINT"],       
         token=os.environ["ASTRA_DB_APPLICATION_TOKEN"],         
@@ -92,4 +92,5 @@ def generate_answer(user_input: str):
     except Exception as e:
 
         raise HTTPException(status_code=500, detail=str(e))
+
     
