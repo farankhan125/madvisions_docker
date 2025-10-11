@@ -1,8 +1,10 @@
 import os
 from dotenv import load_dotenv
+import time
+from typing import Dict, List
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
 from langchain_openai import OpenAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -39,7 +41,7 @@ vector_store = AstraDBVectorStore(
         collection_name="Madvisions_Data",       
         embedding=embedding_model,
         api_endpoint=os.environ["ASTRA_DB_API_ENDPOINT"],       
-        token=os.environ["ASTRA_DB_APPLICATION_TOKEN"],         
+        token=os.environ["ASTRA_DB_APPLICATION_TOKEN"],           
         namespace=None         
 )
 
@@ -84,25 +86,37 @@ rag_chain = create_retrieval_chain(
     document_chain
 )
 
-chat_history = []
+chat_histories: Dict[str, List] = {}
+session_timestamps = {}
 
 # Routes
-@app.get("/")
-def home():
-    return {"status": "Madvisions AI API running ✅"}
 
 class UserInput(BaseModel):
     user_input: str
+    session_id: str
 
 @app.post("/ai-answer")
 def generate_answer(request: UserInput):
+
+    for sid in list(session_timestamps.keys()):
+        if time.time() - session_timestamps[sid] > 900:
+            chat_histories.pop(sid, None)
+            session_timestamps.pop(sid, None)
+    
+    session_id = request.session_id
+
+    if session_id not in chat_histories:
+        chat_histories[session_id] = []
+
+    session_timestamps[session_id] = time.time()
+
     try:
         response = rag_chain.invoke({
-            "chat_history": chat_history,
+            "chat_history": chat_histories[session_id],
             "input": request.user_input,
         })
 
-        chat_history.extend([
+        chat_histories[session_id].extend([
             HumanMessage(content=request.user_input),
             AIMessage(content=response["answer"])
         ])
@@ -111,10 +125,3 @@ def generate_answer(request: UserInput):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-    
-
-
-
-
-
