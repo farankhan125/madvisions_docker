@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from pydantic import BaseModel
 from fastapi import HTTPException
 from langchain_openai import OpenAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -78,22 +79,25 @@ chat_history = []
 
 # Routes
 
+class UserInput(BaseModel):
+    user_input: str
+
 @app.post("/ai-answer")
-def generate_answer(user_input: str):
+def generate_answer(request: UserInput):
     try:
         response = rag_chain.invoke({
             "chat_history": chat_history,
-            "input": user_input,
+            "input": request.user_input,
         })
 
         chat_history.extend([
-            HumanMessage(content=user_input),
+            HumanMessage(content=request.user_input),
             AIMessage(content=response["answer"])
         ])
 
         return {"answer": response["answer"]}
 
     except Exception as e:
-
         raise HTTPException(status_code=500, detail=str(e))
+
     
