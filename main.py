@@ -99,7 +99,7 @@ class UserInput(BaseModel):
 def generate_answer(request: UserInput):
 
     for sid in list(session_timestamps.keys()):
-        if time.time() - session_timestamps[sid] > 900:
+        if time.time() - session_timestamps[sid] > 600:
             chat_histories.pop(sid, None)
             session_timestamps.pop(sid, None)
     
@@ -125,3 +125,4 @@ def generate_answer(request: UserInput):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
