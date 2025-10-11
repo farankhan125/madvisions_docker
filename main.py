@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi import HTTPException
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains import create_retrieval_chain
@@ -14,9 +14,9 @@ from langchain_astradb import AstraDBVectorStore
 load_dotenv()
 app = FastAPI()
 
-embedding_model = GoogleGenerativeAIEmbeddings(
-        model="models/gemini-embedding-001",
-        google_api_key=os.getenv("GOOGLE_API_KEY")
+embedding_model = OpenAIEmbeddings(
+    model="text-embedding-3-small",
+    api_key=os.environ["OPENAI_API_KEY"]
 )
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash", 
@@ -26,7 +26,7 @@ llm = ChatGoogleGenerativeAI(
 
 # Reload vector DB (no re-embedding, fast)
 vector_store = AstraDBVectorStore(
-        collection_name="Madvisions_Data_Second",       
+        collection_name="Madvisions_Data",       
         embedding=embedding_model,
         api_endpoint=os.environ["ASTRA_DB_API_ENDPOINT"],       
         token=os.environ["ASTRA_DB_APPLICATION_TOKEN"],         
@@ -41,9 +41,9 @@ contextualize_system_prompt = (
     "just reformulate it if needed and otherwise return it as is."
 )
 
-system_prompt = """You are the Madvisions assistant chatbot, helping users with questions about Madvisions and its services with creativity and minor humor. 
+system_prompt = """You are the Madvisions assistant chatbot, helping users with questions about Madvisions and its services with creativity, clarity, and confidence. 
     Answer using the context provided. Also you can something relevant from your own side.
-    Using the context, give a bit detailed answer but not too long.
+    Using the context, give a summarized answer without missing out any detail.
     Also ask follow-up question related to the conversation.
     If the question is outside Madvisions services, politely respond: 
     "I am here to assist with Madvisions services only."
@@ -62,7 +62,7 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "{input}")
 ])
 
-retriever = vector_store.as_retriever(search_kwargs={'k': 2})
+retriever = vector_store.as_retriever(search_kwargs={'k': 3})
 history_aware_retriever = create_history_aware_retriever(
     llm,
     retriever,
@@ -96,6 +96,4 @@ def generate_answer(user_input: str):
     except Exception as e:
 
         raise HTTPException(status_code=500, detail=str(e))
-
     
-
