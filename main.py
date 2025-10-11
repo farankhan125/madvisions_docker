@@ -78,6 +78,9 @@ rag_chain = create_retrieval_chain(
 chat_history = []
 
 # Routes
+@app.get("/")
+def home():
+    return {"status": "Madvisions AI API running ✅"}
 
 class UserInput(BaseModel):
     user_input: str
@@ -101,3 +104,4 @@ def generate_answer(request: UserInput):
         raise HTTPException(status_code=500, detail=str(e))
 
     
+
