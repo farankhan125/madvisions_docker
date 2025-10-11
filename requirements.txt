@@ -4,4 +4,5 @@ python-dotenv
 langchain>=0.3.23,<0.4
 langchain-core>=0.3.52,<0.4
 langchain-google-genai
+langchain_openai
 langchain-astradb
