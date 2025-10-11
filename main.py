@@ -15,6 +15,18 @@ from langchain_astradb import AstraDBVectorStore
 load_dotenv()
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "*",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 embedding_model = OpenAIEmbeddings(
     model="text-embedding-3-small",
     api_key=os.environ["OPENAI_API_KEY"]
@@ -77,19 +89,6 @@ rag_chain = create_retrieval_chain(
 
 chat_history = []
 
-from fastapi.middleware.cors import CORSMiddleware
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "*",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
 # Routes
 @app.get("/")
 def home():
@@ -117,6 +116,7 @@ def generate_answer(request: UserInput):
         raise HTTPException(status_code=500, detail=str(e))
 
     
+
 
 
 
