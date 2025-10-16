@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
 from langchain_openai import OpenAIEmbeddings
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -30,10 +30,11 @@ embedding_model = OpenAIEmbeddings(
     model="text-embedding-3-small",
     api_key=os.environ["OPENAI_API_KEY"]
 )
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash", 
-    temperature=0, 
-    google_api_key=os.environ["GOOGLE_API_KEY"]
+
+llm = ChatOpenAI(
+    model="gpt-5-mini",
+    temperature=0,
+    api_key=os.environ["OPENAI_API_KEY"]
 )
 
 # Reload vector DB (no re-embedding, fast)
@@ -128,6 +129,7 @@ def generate_answer(request: UserInput):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 
