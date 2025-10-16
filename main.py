@@ -32,7 +32,7 @@ embedding_model = OpenAIEmbeddings(
 )
 
 llm = ChatOpenAI(
-    model="gpt-5-mini",
+    model="gpt-5",
     temperature=0,
     api_key=os.environ["OPENAI_API_KEY"]
 )
@@ -129,6 +129,7 @@ def generate_answer(request: UserInput):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 
